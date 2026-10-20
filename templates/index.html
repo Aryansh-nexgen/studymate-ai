@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate AI - GitHub Project Coach</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 35px auto; padding: 0 18px; background: #f4f7fb; color: #182235; }
+    h1 { color: #2457d6; }
+    .card { background: white; padding: 20px; margin: 18px 0; border-radius: 12px; box-shadow: 0 2px 10px #0001; }
+    input { width: 70%; max-width: 500px; padding: 12px; border: 1px solid #ccd3df; border-radius: 7px; }
+    button { padding: 12px 18px; background: #2457d6; color: white; border: 0; border-radius: 7px; cursor: pointer; }
+    li { margin: 10px 0; }
+    .error { color: #b42318; }
+    .score { font-size: 38px; font-weight: bold; color: #2457d6; }
+    a { color: #2457d6; }
+  </style>
+</head>
+<body>
+  <h1>StudyMate AI</h1>
+  <p>Your GitHub Repository Readiness Coach</p>
+
+  <div class="card">
+    <h2>Analyze a public GitHub repository</h2>
+    <form method="POST">
+      <input type="url" name="repo_url"
+        placeholder="https://github.com/owner/repository"
+        value="{{ repo_url }}" required>
+      <button type="submit">Scan Repository</button>
+    </form>
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+  </div>
+
+  {% if report %}
+    <div class="card">
+      <h2>Repository Report</h2>
+      <p><a href="{{ report.repo.url }}" target="_blank">{{ report.repo.name }}</a></p>
+      <p>{{ report.repo.description }}</p>
+      <div class="score">{{ report.score }}/100</div>
+      <p>Readiness checklist score (not an official hackathon score).</p>
+      <p>Language: {{ report.repo.language }}</p>
+      <p>Stars: {{ report.repo.stars }} | Forks: {{ report.repo.forks }}</p>
+      <p>Default branch: {{ report.repo.default_branch }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Readiness Checklist</h2>
+      <ul>
+        {% for item in report.checks %}
+          <li>
+            {% if item.passed %}✅{% else %}❌{% endif %}
+            <strong>{{ item.name }}</strong> — {{ item.detail }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Suggestions to Improve</h2>
+      <ul>
+        {% for item in report.recommendations %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Contributors</h2>
+      <ul>
+        {% for person in report.contributors %}
+          <li>{{ person.name }} — {{ person.commits_seen }} commits seen</li>
+        {% else %}
+          <li>No contributor data available.</li>
+        {% endfor %}
+      </ul>
+      <p>Commits sampled: {{ report.commit_count_seen }}</p>
+      <p>Pull requests sampled: {{ report.pull_requests_seen }}</p>
+      <p>Issues: {{ report.issues_seen }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Practice Questions</h2>
+      <ol>
+        {% for question in report.questions %}
+          <li>{{ question }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Important Limitations</h2>
+      <ul>
+        {% for item in report.limitations %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <p>Report generated: {{ report.generated_at }}</p>
+    </div>
+  {% endif %}
+</body>
+</html>
